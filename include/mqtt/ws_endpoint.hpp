@@ -12,6 +12,7 @@
 #endif // defined(MQTT_USE_TLS)
 
 #include <boost/beast/websocket.hpp>
+#include <boost/beast/core/flat_buffer.hpp>
 #include <boost/asio/bind_executor.hpp>
 
 #include <mqtt/namespace.hpp>
@@ -195,7 +196,7 @@ public:
 
 private:
     boost::beast::websocket::stream<Socket> ws_;
-    boost::beast::multi_buffer buffer_;
+    boost::beast::flat_buffer buffer_;
     Strand strand_;
 };
 

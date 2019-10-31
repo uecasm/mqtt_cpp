@@ -561,15 +561,20 @@ private:
                             return;
                         }
                         auto ps = socket.get();
-                        ps->async_accept_ex(
+                        auto it = request->find("Sec-WebSocket-Protocol");
+                        if (it != request->end()) {
+                            ps->set_option(
+                                boost::beast::websocket::stream_base::decorator(
+                                    [name = it->name(), value = it->value()] // name is enum, value is boost::string_view
+                                    (boost::beast::websocket::response_type& res) {
+                                        // This lambda is called before the scope out point *1
+                                        res.set(name, value);
+                                    }
+                                )
+                            );
+                        }
+                        ps->async_accept(
                             *request,
-                            [request]
-                            (boost::beast::websocket::response_type& m) {
-                                auto it = request->find("Sec-WebSocket-Protocol");
-                                if (it != request->end()) {
-                                    m.insert(it->name(), it->value());
-                                }
-                            },
                             [this, socket = force_move(socket), tim, underlying_finished]
                             (boost::system::error_code const& ec) mutable {
                                 *underlying_finished = true;
@@ -581,6 +586,7 @@ private:
                                 if (h_accept_) h_accept_(force_move(sp));
                             }
                         );
+                        // scope out point *1
                     }
                 );
                 do_accept();

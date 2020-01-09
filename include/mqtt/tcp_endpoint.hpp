@@ -23,6 +23,8 @@ namespace as = boost::asio;
 template <typename Socket, typename Strand>
 class tcp_endpoint {
 public:
+    typedef typename Socket::native_handle_type native_handle_type;
+
     template <typename... Args>
     tcp_endpoint(as::io_context& ioc, Args&&... args)
         :tcp_(ioc, std::forward<Args>(args)...),
@@ -43,6 +45,10 @@ public:
 
     typename Socket::lowest_layer_type& lowest_layer() {
         return tcp_.lowest_layer();
+    }
+
+    native_handle_type native_handle() {
+        return tcp_.native_handle();
     }
 
     template <typename... Args>

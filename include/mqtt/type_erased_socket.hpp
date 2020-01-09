@@ -17,6 +17,22 @@
 #include <mqtt/namespace.hpp>
 #include <mqtt/shared_any.hpp>
 
+template<class T>
+struct socket_native_handle_type_impl
+{
+    typedef typename T::native_handle_type type;
+};
+
+template<class T>
+struct socket_native_handle_type
+{
+    typedef typename ::boost::mpl::eval_if<
+        ::boost::type_erasure::is_placeholder<T>,
+        ::boost::mpl::identity<void>,
+        socket_native_handle_type_impl<T>
+    >::type type;
+};
+
 // I intentionally use old style boost type_erasure member fucntion concept definition.
 // The new style requires compiler extension.
 // If -pedantic compile option is set, then get
@@ -26,6 +42,7 @@ BOOST_TYPE_ERASURE_MEMBER((MQTT_NS)(has_async_write), async_write, 3)
 BOOST_TYPE_ERASURE_MEMBER((MQTT_NS)(has_write), write, 2)
 BOOST_TYPE_ERASURE_MEMBER((MQTT_NS)(has_post), post, 1)
 BOOST_TYPE_ERASURE_MEMBER((MQTT_NS)(has_lowest_layer), lowest_layer, 0)
+BOOST_TYPE_ERASURE_MEMBER((MQTT_NS)(has_native_handle), native_handle, 0)
 BOOST_TYPE_ERASURE_MEMBER((MQTT_NS)(has_close), close, 1)
 
 namespace MQTT_NS {
@@ -50,6 +67,7 @@ using socket = shared_any<
         has_write<std::size_t(std::vector<as::const_buffer>, boost::system::error_code&)>,
         has_post<void(std::function<void()>)>,
         has_lowest_layer<as::ip::tcp::socket::lowest_layer_type&()>,
+        has_native_handle<deduced<socket_native_handle_type<_self>>()>,
         has_close<void(boost::system::error_code&)>
     >
 >;

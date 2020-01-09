@@ -10,6 +10,7 @@
 #include <cstdlib>
 
 #include <boost/config/workaround.hpp>
+#include <boost/any.hpp>
 #include <boost/type_erasure/member.hpp>
 #include <boost/system/error_code.hpp>
 #include <boost/asio.hpp>
@@ -26,6 +27,7 @@ BOOST_TYPE_ERASURE_MEMBER((MQTT_NS)(has_async_write), async_write, 3)
 BOOST_TYPE_ERASURE_MEMBER((MQTT_NS)(has_write), write, 2)
 BOOST_TYPE_ERASURE_MEMBER((MQTT_NS)(has_post), post, 1)
 BOOST_TYPE_ERASURE_MEMBER((MQTT_NS)(has_lowest_layer), lowest_layer, 0)
+BOOST_TYPE_ERASURE_MEMBER((MQTT_NS)(has_native_handle), native_handle, 0)
 BOOST_TYPE_ERASURE_MEMBER((MQTT_NS)(has_close), close, 1)
 
 namespace MQTT_NS {
@@ -50,6 +52,7 @@ using socket = shared_any<
         has_write<std::size_t(std::vector<as::const_buffer>, boost::system::error_code&)>,
         has_post<void(std::function<void()>)>,
         has_lowest_layer<as::ip::tcp::socket::lowest_layer_type&()>,
+        has_native_handle<boost::any()>,
         has_close<void(boost::system::error_code&)>
     >
 >;
